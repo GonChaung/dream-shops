@@ -2,6 +2,7 @@ package dev.gonchaung.dreamshops.service.product;
 
 import dev.gonchaung.dreamshops.model.Product;
 import dev.gonchaung.dreamshops.request.AddProductRequest;
+import dev.gonchaung.dreamshops.request.ProductUpdateRequest;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ public interface IProductService {
     Product addProduct(AddProductRequest request);
     Product getProductById(Long id);
     void deleteProductById(Long id);
-    void updateProductById(Product product, Long productId);
+    Product updateProductById(ProductUpdateRequest request, Long productId);
     List<Product> getAllProducts();
     List<Product> getProductsByCategory(String category);
     List<Product> getProductsByBrand(String brand);
