@@ -1,28 +1,50 @@
 package dev.gonchaung.dreamshops.service.product;
 
 import dev.gonchaung.dreamshops.exception.ProductNotFoundExcepiton;
+import dev.gonchaung.dreamshops.model.Category;
 import dev.gonchaung.dreamshops.model.Product;
+import dev.gonchaung.dreamshops.repository.CategoryRepository;
 import dev.gonchaung.dreamshops.repository.ProductRepository;
 import dev.gonchaung.dreamshops.request.AddProductRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
-
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public Product addProduct(AddProductRequest request) {
-        return null;
+        // check if the category is found in the DB
+        // If yes, set it as the new product category
+        // If no, the save it as a new category
+        // The set as the new prduct category
+
+        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
+                .orElseGet(() -> {
+                    Category newCategory = new Category(request.getCategory().getName());
+                    return categoryRepository.save(newCategory);
+                });
+        request.setCategory(category);
+        return productRepository.save(createProduct(request, category));
     }
 
     private Product createProduct(AddProductRequest request, Category category){
-
+        return new Product(
+                request.getName(),
+                request.getBrand(),
+                request.getPrice(),
+                request.getInventory(),
+                request.getDescription(),
+                category
+        );
     }
+
 
     @Override
     public Product getProductById(Long id) {
@@ -75,5 +97,4 @@ public class ProductService implements IProductService {
     public Long countProductsByBrandAndName(String brand, String name) {
         return productRepository.countByBrandAndName(brand, name);
     }
-
 }
