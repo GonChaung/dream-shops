@@ -22,10 +22,14 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
-@RequestMapping("${api.prefix/images")
-@RequiredArgsConstructor
+@RequestMapping("${api.prefix}/images")
 public class ImageController {
     private final IImageService imageService;
+
+    public ImageController(IImageService imageService) {
+        this.imageService = imageService;
+    }
+
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse> saveImages(@RequestParam List<MultipartFile> files, @RequestParam Long productId) {
@@ -40,9 +44,13 @@ public class ImageController {
     @GetMapping("/image/download/{imageId}")
     public ResponseEntity<Resource> downloadImage(@PathVariable Long imageId) throws SQLException {
         Image image = imageService.getImageById(imageId);
-        ByteArrayResource resource = new ByteArrayResource(image.getImage().getBytes(1, (int) image.getImage().length()));
-        return  ResponseEntity.ok().contentType(MediaType.parseMediaType(image.getFileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +image.getFileName() + "\"")
+        // Convert the Blob to a byte array
+        byte[] imageBytes = image.getImage().getBytes(1, (int) image.getImage().length());
+        ByteArrayResource resource = new ByteArrayResource(imageBytes);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(image.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + image.getFileName() + "\"")
                 .body(resource);
     }
 
